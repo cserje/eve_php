@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-toolbar dense>
+    <v-toolbar>
       <BtnBack />
       <v-toolbar-title>{{ categoryTitle }}</v-toolbar-title>
     </v-toolbar>
@@ -43,8 +43,8 @@ export default {
   methods: {
     selectStandardItem(standardItem) {
       this.$store.commit("selectStandardItem", standardItem);
-      if (this.$store.state.selectedStandardItem){
-          this.$router.push("/standard_item")
+      if (this.$store.state.selectedStandardItem) {
+        this.$router.push("/standard_item");
       }
     },
   },

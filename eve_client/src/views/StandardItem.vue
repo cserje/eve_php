@@ -20,7 +20,11 @@
     </v-container>
     <v-divider />
     <v-container>
-      <v-form ref="standardItemForm" @submit.prevent="submit" v-model="isFormValid">
+      <v-form
+        ref="standardItemForm"
+        @submit.prevent="submit"
+        v-model="isFormValid"
+      >
         <div v-for="field in getFields" :key="field.id">
           <v-select
             v-if="field.type === 'SELECT'"
@@ -29,7 +33,13 @@
             :label="field.name"
             :required="field.required"
             v-model="fields[field.id]"
-            :rules="[(v) => !!v || !field.required || isInModel(field.id) || 'Kötelező kiválasztani!']"
+            :rules="[
+              (v) =>
+                !!v ||
+                !field.required ||
+                isInModel(field.id) ||
+                'Kötelező kiválasztani!',
+            ]"
           ></v-select>
           <v-text-field
             v-if="field.type === 'TEXT'"
@@ -41,7 +51,7 @@
           ></v-text-field>
         </div>
         <v-select
-          v-if='mode === "discover" && workers'
+          v-if="mode === 'discover' && workers"
           name="worker"
           :items="workers"
           label="Felhasználó kiválasztása"
@@ -49,7 +59,9 @@
           required
           :rules="[(v) => !!v || 'Kötelező kiválasztani!']"
         ></v-select>
-        <v-btn elevation="2" outlined type="submit">Mentés</v-btn>
+        <v-btn elevation="2" outlined type="submit">{{
+          mode === "update" ? "Módosítás" : "Mentés"
+        }}</v-btn>
       </v-form>
     </v-container>
   </div>
@@ -80,13 +92,45 @@ export default {
   },
   methods: {
     isInModel(fieldId) {
-     return Object.keys(this.fields).indexOf(fieldId.toString()) >= 0;
+      return Object.keys(this.fields).indexOf(fieldId.toString()) >= 0;
     },
     submit() {
       this.$refs.standardItemForm.validate();
-      if (this.isFormValid){
-        var data = {standard:  this.$store.state.selectedStandardItem.id, mode: this.mode, fields: this.fields, worker: this.worker};
-        console.log(JSON.stringify(data));
+      if (this.isFormValid) {
+        var data = {
+          standard: this.$store.state.selectedStandardItem.id,
+          // mode: this.mode,
+          fields: this.fields,
+          worker: this.worker,
+        };
+        if (this.mode === "discover" || this.mode === "create") {
+          this.$store
+            .dispatch("createEquipment", data)
+            .then(() => {
+              if (this.mode === "create") {
+                alert("Sikeres mentés!");
+                this.$router.go(-3);
+              } else {
+                alert("Sikeres mentés!");
+                this.$router.go(-1);
+              }
+            })
+            .catch((error) => alert(JSON.stringify(error)));
+        } else if (this.mode == "update") {
+          const data = {
+            equipment_id: this.$store.state.selectedEquipmentId,
+            fields: this.fields,
+          };
+          this.$store
+            .dispatch("updateEquipment", data)
+            .then(() => {
+              alert("Sikeres mentés!");
+              this.$router.go(-1);
+            })
+            .catch((error) => {
+              alert(JSON.stringify(error));
+            });
+        }
       }
     },
   },
@@ -110,8 +154,12 @@ export default {
   },
   mounted() {
     this.$store.dispatch("getStandardItemFields");
-    if (!this.$store.state.selectedWorker) {
-      this.mode = "discover";
+    this.mode = this.$store.state.mode;
+    console.log("mode", this.mode);
+    if (this.mode === "update") {
+      this.fields = this.$store.state.selectedEquipment;
+    }
+    if (this.mode === "discover" && !this.$store.state.selectedWorker) {
       this.$store.dispatch("getWorkers");
     } else {
       this.worker = this.$store.state.selectedWorker.id;

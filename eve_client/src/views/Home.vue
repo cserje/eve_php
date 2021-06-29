@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-toolbar dense>
+    <v-toolbar>
       <v-toolbar-title>Főoldal</v-toolbar-title>
     </v-toolbar>
     <v-container>
@@ -21,6 +21,7 @@ export default {
   methods: {
     openCategories() {
       this.$store.dispatch("selectWorker", null);
+      this.$store.commit("setMode", "discover");
       this.$router.push("/categories");
     },
     openWorkers() {

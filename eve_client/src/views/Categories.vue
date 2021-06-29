@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-toolbar dense>
+    <v-toolbar>
       <BtnBack />
       <v-toolbar-title>Kategóriák</v-toolbar-title>
     </v-toolbar>
